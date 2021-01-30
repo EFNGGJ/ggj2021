@@ -18,7 +18,7 @@ var game = new Phaser.Game(config);
 
 function preload ()
 {
-
+  this.load.audio('boop', [ 'audio/bg.m4a' ]);
 }
 
 function create ()
