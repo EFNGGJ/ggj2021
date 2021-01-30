@@ -21,7 +21,7 @@ async function init() {
 
     // Convenience function to set up a webcam
     const flip = true; // whether to flip the webcam
-    webcam = new tmImage.Webcam(200, 200, flip); // width, height, flip
+    webcam = new tmImage.Webcam(300, 300, flip); // width, height, flip
     await webcam.setup(); // request access to the webcam
     await webcam.play();
     window.requestAnimationFrame(loop);
@@ -49,11 +49,14 @@ async function predict() {
         const classPrediction =
             prediction[i].className + ": " + prediction[i].probability.toFixed(2);
         labelContainer.childNodes[i].innerHTML = classPrediction;
-        if (prediction[0].probability > prediction[1].probability){
-            emojiLabel.innerHTML = "&#x1F600";
-        } else {
-            emojiLabel.innerHTML = "&#x1F62E";
-        }
+    }
+
+    if (prediction[0].probability > 0.7){
+      emojiLabel.innerHTML = "&#x1F600";
+    } else if (prediction[1].probability > 0.7){
+      emojiLabel.innerHTML = "&#x1F62E";
+    } else {
+      emojiLabel.innerHTML = "?";
     }
 
 }
