@@ -5,14 +5,11 @@
     const URL = "https://teachablemachine.withgoogle.com/models/GFwPntcSE/";
 
     let model, webcam, labelContainer, maxPredictions;
-    var bgTrack = document.getElementById("background");
 
     // Load the image model and setup the webcam
     async function init() {
         const modelURL = URL + "model.json";
         const metadataURL = URL + "metadata.json";
-
-	bgTrack.play();
 
         // load the model and metadata
         // Refer to tmImage.loadFromFiles() in the API to support files from a file picker
