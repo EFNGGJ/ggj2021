@@ -18,6 +18,10 @@ body {
 
 .cam {
   display: inline;
+  border-color: var(--color-yellow, yellow);
+  border-width: 10px;
+  width: 200px;
+  height: 200px;
 }
 
 img {

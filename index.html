@@ -6,9 +6,9 @@
         <title>Pattern Game</title>
     </head>
 
-    <body>
+    <body onload="init();">
 
-        // Sound
+
         <audio id="background" autoplay loop>
             <source src="audio/bg.m4a" type="audio/mp4">
             Your browser does not support the audio element.
@@ -16,15 +16,12 @@
 
         <div>Make a face!</div>
 
-        <button type="button" onclick="init()">Start</button>
-
-
 	<div>
 	<div class="emoji">&#x1F62E &#x1F600 </div>
-
 	<div class="cam" id="webcam-container"></div>
 	<div class="emoji">&#x1F600</div>
 	</div>
+
 	<div id="label-container"></div>
 	<div class="emoji answer" id="label-emoji"></div>
 

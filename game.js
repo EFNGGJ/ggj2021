@@ -5,8 +5,9 @@
 const URL = "https://teachablemachine.withgoogle.com/models/GFwPntcSE/";
 
 let model, webcam, labelContainer, maxPredictions;
+//document.getElementById("webcam-container").appendChild(webcam.canvas);
 
-// Load the image model and setup the webcam
+// Load the image model and set up the webcam
 async function init() {
     const modelURL = URL + "model.json";
     const metadataURL = URL + "metadata.json";
@@ -18,7 +19,7 @@ async function init() {
     model = await tmImage.load(modelURL, metadataURL);
     maxPredictions = model.getTotalClasses();
 
-    // Convenience function to setup a webcam
+    // Convenience function to set up a webcam
     const flip = true; // whether to flip the webcam
     webcam = new tmImage.Webcam(200, 200, flip); // width, height, flip
     await webcam.setup(); // request access to the webcam
