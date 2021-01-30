@@ -1,5 +1,10 @@
 body {
   font-family: "Lato", sans-serif;
+  --color-blue: #70d6ff;
+  --color-pink: #ff70a6;
+  --color-salmon: #ff9770;
+  --color-orange: #ffd670;
+  --color-yellow: #e9ff70;
 }
 
 * {

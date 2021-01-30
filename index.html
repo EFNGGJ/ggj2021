@@ -8,11 +8,21 @@
 
 <body>
 
+<audio id="background">
+  <source src="bg.mp3" type="audio/mpeg">
+  Your browser does not support the audio element.
+</audio>
+
 <div>Make a face!</div>
+
 <button type="button" onclick="init()">Start</button>
+
 <div id="webcam-container"></div>
+
 <div id="label-container"></div>
+
 <div class="emoji" id="label-emoji"></div>
+
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
 <script src="game.js"></script>
