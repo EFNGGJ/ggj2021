@@ -1,32 +1,32 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta charset="utf-8">
-<link rel="stylesheet" href="style.css">
-<title>Pattern Game</title>
-</head> 
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="style.css">
+        <title>Pattern Game</title>
+    </head>
 
-<body>
+    <body>
 
-// Sound
-<audio id="background" autoplay loop>
-  <source src="audio/bg.m4a" type="audio/mp4">
-  Your browser does not support the audio element.
-</audio>
+        // Sound
+        <audio id="background" autoplay loop>
+            <source src="audio/bg.m4a" type="audio/mp4">
+            Your browser does not support the audio element.
+        </audio>
 
-<div>Make a face!</div>
+        <div>Make a face!</div>
 
-<button type="button" onclick="init()">Start</button>
+        <button type="button" onclick="init()">Start</button>
 
-<div id="webcam-container"></div>
+        <div id="webcam-container"></div>
 
-<div id="label-container"></div>
+        <div id="label-container"></div>
 
-<div class="emoji" id="label-emoji"></div>
+        <div class="emoji" id="label-emoji"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
-<script src="game.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
+        <script src="game.js"></script>
 
-</body>
+    </body>
 </html>
