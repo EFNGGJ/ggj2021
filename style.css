@@ -5,6 +5,8 @@ body {
   --color-salmon: #ff9770;
   --color-orange: #ffd670;
   --color-yellow: #e9ff70;
+  
+  margin: 0;
 }
 
 * {
