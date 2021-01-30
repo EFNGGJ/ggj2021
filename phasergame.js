@@ -33,6 +33,8 @@ const config = {
 const game = new Phaser.Game(config);
 var webcam, model, maxPredictions, webcamGameObject, emojiGameObject, isPredicting;
 
+var slotDomObjects;
+
 function preload ()
 {   
     window.addEventListener('resize', resize.bind(this));
@@ -44,50 +46,76 @@ function preload ()
         let h = window.innerHeight * window.devicePixelRatio;
         
         this.scale.resize(w , h);
+        updateSlotPositionsAndDimensions();
     }
 }
 
 async function create ()
 {
-    let buildWebcam = new tmImage.Webcam(300, 300, false); // width, height, flip
-    
-    await buildWebcam.setup();
-    await buildWebcam.play();
-    
-    
-    
-    const modelURL = teachableMachineURL + "model.json";
-    const metadataURL = teachableMachineURL + "metadata.json";
+    async function createWebcam()
+    {
+        let buildWebcam = new tmImage.Webcam(400, 400, false); // width, height, flip
+        
+        await buildWebcam.setup();
+        await buildWebcam.play();    
+        
+        webcam = buildWebcam;
+    }
 
-    // load the model and metadata
-    // Refer to tmImage.loadFromFiles() in the API to support files from a file picker
-    // or files from your local hard drive
-    // Note: the pose library adds "tmImage" object to your window (window.tmImage)
-    model = await tmImage.load(modelURL, metadataURL);
-    maxPredictions = model.getTotalClasses();
+    async function createModel()
+    {
+        const modelURL = teachableMachineURL + "model.json";
+        const metadataURL = teachableMachineURL + "metadata.json";
+
+        model = await tmImage.load(modelURL, metadataURL);
+        maxPredictions = model.getTotalClasses();
+    }
+
+    await Promise.all([
+        createWebcam.call(this),
+        createModel.call(this),
+    ]);
+    await model.predict(webcam.canvas);
 
 
-    let webcamCanvas = await buildWebcam.canvas;
+    let webcamCanvas = await webcam.canvas;
     
-    let webcamGameObject = this.add.dom(500, 500, webcamCanvas, {scale: window.devicePixelRatio}, null);
-    webcamGameObject.setScale(window.devicePixelRatio, window.devicePixelRatio)
-    
-    webcam = buildWebcam;
+    slotDomObjects = [
+        this.add.dom(0, 0, 'div', {'font-size': '200px'}, String.fromCodePoint(0x1F600)),
+        this.add.dom(300, 0, 'div', {'font-size': '200px'}, String.fromCodePoint(0x1F62E)),
+        this.add.dom(600, 0, 'div', {'font-size': '200px'}, String.fromCodePoint(0x1F600)),
+        this.add.dom(300, 0, 'div', {'font-size': '200px'}, String.fromCodePoint(0x1F62E)),
+    ];
 
-    emojiGameObject = this.add.dom(800, 300, 'div', {'font-size': '200px'}, '😀');
-    emojiGameObject.setScale(window.devicePixelRatio, window.devicePixelRatio)
+    for (let slotIndex in slotDomObjects) {
+        slotDomObjects[slotIndex].setScale(window.devicePixelRatio, window.devicePixelRatio);
+    }
+    emojiGameObject = slotDomObjects[slotDomObjects.length - 1]
+
+    webcamGameObject = this.add.dom(0, 0, webcamCanvas, null, null),
     
-    this.tweens.add({
-        targets: emojiGameObject,
-        angle: 360,
-        duration: 1000,
-        ease: 'sine.inout',
-        yoyo: true,
-        repeat: 1000,
-        frameBased: false
-    });
+    updateSlotPositionsAndDimensions();
     
     console.log('created')
+}
+
+function updateSlotPositionsAndDimensions() 
+{
+    let y = window.innerHeight * window.devicePixelRatio / 3;
+    if(slotDomObjects) {
+        let count = slotDomObjects.length;
+        let xOffset = window.innerWidth * window.devicePixelRatio / (count + 1);
+        let x = 0;
+        for(let i = 0; i < count; ++i) {
+            x += xOffset;
+            slotDomObjects[i].x = x;
+            slotDomObjects[i].y = y;
+        }
+    }
+    if(webcamGameObject) {
+        webcamGameObject.x = window.innerWidth * window.devicePixelRatio / 2;
+        webcamGameObject.y = y * 2;
+    }     
 }
 
 async function update ()
