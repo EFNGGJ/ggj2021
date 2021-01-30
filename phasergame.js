@@ -30,10 +30,8 @@ const config = {
     },
 };
 
-
 const game = new Phaser.Game(config);
 var webcam, model, maxPredictions, webcamGameObject, emojiGameObject, isPredicting;
-
 
 function preload ()
 {   
@@ -56,12 +54,6 @@ async function create ()
     await buildWebcam.setup();
     await buildWebcam.play();
     
-    let webcamCanvas = await buildWebcam.canvas;
-    
-    let webcamGameObject = this.add.dom(500, 500, webcamCanvas, {scale: window.devicePixelRatio}, null);
-    webcamGameObject.setScale(window.devicePixelRatio, window.devicePixelRatio)
-    
-    webcam = buildWebcam;
     
     
     const modelURL = teachableMachineURL + "model.json";
@@ -74,8 +66,28 @@ async function create ()
     model = await tmImage.load(modelURL, metadataURL);
     maxPredictions = model.getTotalClasses();
 
+
+    let webcamCanvas = await buildWebcam.canvas;
+    
+    let webcamGameObject = this.add.dom(500, 500, webcamCanvas, {scale: window.devicePixelRatio}, null);
+    webcamGameObject.setScale(window.devicePixelRatio, window.devicePixelRatio)
+    
+    webcam = buildWebcam;
+
     emojiGameObject = this.add.dom(800, 300, 'div', {'font-size': '200px'}, '😀');
     emojiGameObject.setScale(window.devicePixelRatio, window.devicePixelRatio)
+    
+    this.tweens.add({
+        targets: emojiGameObject,
+        angle: 360,
+        duration: 1000,
+        ease: 'sine.inout',
+        yoyo: true,
+        repeat: 1000,
+        frameBased: false
+    });
+    
+    console.log('created')
 }
 
 async function update ()
@@ -88,7 +100,7 @@ async function update ()
         isPredicting = true;
         const prediction = await model.predict(webcam.canvas);
 
-        console.log(prediction);
+        //console.log(prediction);
 
         if (prediction[0].probability > 0.7){
             emojiGameObject.node.innerHTML = "&#x1F600";
