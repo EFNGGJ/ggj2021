@@ -1,0 +1,47 @@
+body {
+  font-family: "Lato", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+img {
+  vertical-align: middle;
+}
+
+.emoji {
+  font-size: 200px;
+}
+
+.sidenav {
+  width: 30%;
+  position: fixed;
+  z-index: 1;
+  top: 20px;
+  left: 5%;
+  overflow-x: hidden;
+  padding: 8px 0;
+}
+
+.butt {
+  top: 50%;
+  
+  padding: 10px 10px 10px 10px;
+  text-decoration: none;
+  font-size: 18px;
+  color: black;
+  width: 33%;
+  
+  vertical-align: center;
+}
+
+.butt:hover {
+  background-color: rgba(0,0,0,0.2);
+}
+
+.padded {
+  padding: 10px 10px 10px 10px;
+  vertical-align: center;
+}
+
