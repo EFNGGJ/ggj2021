@@ -11,12 +11,27 @@ body {
   box-sizing: border-box;
 }
 
+.title {
+  color: var(--color-salmon, salmon);
+  font-size: 64px;
+}
+
+.cam {
+  display: inline;
+}
+
 img {
   vertical-align: middle;
 }
 
 .emoji {
   font-size: 200px;
+  display: inline;
+  background-color: var(--color-blue, blue);
+}
+
+.emoji.answer {
+  background-color: var(--color-yellow, yellow);
 }
 
 .sidenav {
