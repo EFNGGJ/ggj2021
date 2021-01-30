@@ -38,6 +38,11 @@ var slotDomObjects;
 function preload ()
 {   
     window.addEventListener('resize', resize.bind(this));
+
+    this.load.audio('happy', 'audio/happy.mp4');
+    this.load.audio('surprised', 'audio/surprised.mp4');
+    this.load.audio('sleepy', 'audio/sleepy.mp4');
+    this.load.audio('angry', 'audio/angry.mp4');
      
     function resize ()
     {
@@ -48,6 +53,8 @@ function preload ()
         this.scale.resize(w , h);
         updateSlotPositionsAndDimensions();
     }
+
+
 }
 
 async function create ()
