@@ -266,7 +266,7 @@ export default class Emoji_Pattern extends Scene
                             'surprised', 
                             'angry', 
                             'sleepy',
-                            //'silly',
+                            'silly',
                         ];
                                                 
                         var bestPredictionProbability = 0;
