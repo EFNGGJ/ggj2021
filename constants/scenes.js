@@ -1,3 +1,3 @@
 export const INIT = 'Init';
 
-export const EMOJI = 'Emoji';
+export const EMOJI_PATTERN = 'Emoji_Pattern';

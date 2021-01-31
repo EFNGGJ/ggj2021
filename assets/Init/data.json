@@ -1,10 +1,41 @@
 {
-  "Emoji": {
+  "Emoji_Pattern": {
+    "emoji": [
+      {
+        "name": "happy",
+        "codePoint": "0x1F600",
+        "hasSound": true
+      },
+      {
+        "name": "surprised",
+        "codePoint": "0x1F62E",
+        "hasSound": true
+      },
+      {
+        "name": "sleepy",
+        "codePoint": "0x1F634",
+        "hasSound": true
+      },
+      {
+        "name": "angry",
+        "codePoint": "0x1F620",
+        "hasSound": true
+      },
+      {
+        "name": "mystery",
+        "codePoint": "0x2753",
+        "hasSound": false
+      }
+    ],
     "patterns": [
       {
         "key": "default",
         "emoji": [
-        ]
+          "happy",
+          "surprised",
+          "happy"
+        ],
+        "target_emoji": "surprised"
       }
     ]
   }

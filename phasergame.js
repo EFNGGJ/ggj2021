@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 
 import Init from './scenes/Init';
-import Emoji from './scenes/Emoji';
+import Emoji_Pattern from './scenes/Emoji_Pattern';
 
 const config = {
     type: Phaser.AUTO,
@@ -16,7 +16,7 @@ const config = {
         height: window.innerHeight * window.devicePixelRatio,
         zoom: 1 / window.devicePixelRatio,
     },
-    scene: [Init, Emoji],
+    scene: [Init, Emoji_Pattern],
 };
 
 const game = new Phaser.Game(config);

@@ -1,6 +1,6 @@
 import { Scene } from 'phaser';
 
-import {INIT, EMOJI} from '../constants/scenes';
+import {INIT, EMOJI_PATTERN} from '../constants/scenes';
 
 import assets from '../assets/Init/*.*'
 
@@ -18,7 +18,7 @@ export default class Init extends Scene {
 
 	onLoadComplete (loader)
 	{
-		this.scene.start(EMOJI);
+		this.scene.start(EMOJI_PATTERN);
         this.scene.shutdown();
 	}
 }

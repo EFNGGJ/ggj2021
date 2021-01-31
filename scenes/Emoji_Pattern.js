@@ -1,6 +1,6 @@
 import { Scene } from 'phaser';
 
-import {EMOJI} from '../constants/scenes';
+import {EMOJI_PATTERN} from '../constants/scenes';
 
 import emojiSounds from '../assets/Emoji/*.m4a';
 
@@ -12,36 +12,48 @@ const teachableMachineURL = "https://teachablemachine.withgoogle.com/models/GFwP
  
 var webcam, model, maxPredictions, webcamGameObject, guessedEmojiTile, isPredicting, isUpdating;
 
-var emojiTiles;
-
 var codePointToSound;
 
 class EmojiTile {
-    constructor (codePoint, scene)
+    constructor (emoji, scene)
     {
-        this.codePoint = codePoint;   
-        this.scene = scene;     
-    }  
-    
-    set codePoint (codePoint) {
-        if(this._codePoint != codePoint) {
-            this._codePoint = codePoint;
+        this._emoji = emoji;
+        this.scene = scene;
+    }
+
+    set emoji (emoji) {
+        console.log("set emoji: ", emoji);
+        if (this._emoji.name != emoji.name) {
+            this._emoji = emoji;
+
             if(this._gameObject) {
-                this._gameObject.node.innerHTML = String.fromCodePoint(codePoint)
+                this._gameObject.node.innerHTML = emoji.string;
             }
         }
     }
-    
-    get codePoint () {
-        return this._codePoint;
+
+    get emoji ()
+    {
+        return this._emoji;
     }
     
     get gameObject () 
     {
         if(!this._gameObject) {
-            this._gameObject = this.scene.add.dom(0, 0, 'div', {'font-size': '200px'}, String.fromCodePoint(this.codePoint));
+            console.log("gameObject: ", this._emoji);
+            this._gameObject = this.scene.add.dom(0, 0, 'div', {'font-size': '200px'}, this._emoji.string);
         }
         return this._gameObject;
+    }
+}
+
+class Emoji {
+    constructor (name, codePoint, sound=null)
+    {
+        this.name = name
+        this.codePoint = parseInt(codePoint)
+        this.string = String.fromCodePoint(this.codePoint)
+        this.sound = sound;
     }
 }
 
@@ -54,11 +66,11 @@ class EmojiTile {
            Put in real music.
 */
 
-export default class Emoji extends Scene
+export default class Emoji_Pattern extends Scene
 {
     constructor ()
     {
-        super(EMOJI);
+        super(EMOJI_PATTERN);
     }
 
     preload ()
@@ -74,40 +86,47 @@ export default class Emoji extends Scene
             this.updateTilePositions();
         }  
 
-        this.load.audio('happy', emojiSounds.happy);
-        this.load.audio('surprised', emojiSounds.surprised);
-        this.load.audio('sleepy', emojiSounds.sleepy);
-        this.load.audio('angry', emojiSounds.angry);
-
         this.stored_data = get(this.cache.json.get('data'), this.scene.key);
         this.patterns = this.stored_data.patterns;
+
+        // Load emoji sounds based on name
+        for (const e of this.stored_data.emoji) {
+            if (e.hasSound) {
+                this.load.audio(e.name, emojiSounds[e.name]);
+            }
+        }
     }
 
     async create ()
     {
         console.log('Creating');
-        console.log(this.patterns);
 
-        codePointToSound = {
-            0x1F600: this.sound.add('happy'),
-            0x1F62E: this.sound.add('surprised'),
-        //sleepy = this.sound.add('sleepy');
-        //angry = this.sound.add('angry');
+        this.emoji = {}
+
+        for (let e of this.stored_data.emoji) {
+            var sound = null;
+
+            if (e.hasSound) {
+                sound = this.sound.add(e.name);
+            }
+            this.emoji[e.name] = new Emoji(e.name, e.codePoint, sound);
         }
 
-        emojiTiles = [
-            new EmojiTile(0x1F600, this),
-            new EmojiTile(0x1F62E, this),
-            new EmojiTile(0x1F600, this),
-            new EmojiTile(0x2753, this),
-        ];
+        this.emojiTiles = [];
+        let pattern = this.patterns[0];
+        for (let ename of pattern.emoji) {
+            this.emojiTiles.push(new EmojiTile(this.emoji[ename], this));
+        }
 
-        for (let tileIndex in emojiTiles) {
-            emojiTiles[tileIndex].gameObject.setScale(window.devicePixelRatio, window.devicePixelRatio);
-            emojiTiles[tileIndex].gameObject.alpha = 0;
+        // Last tile is the question mark
+        this.emojiTiles.push(new EmojiTile(this.emoji['mystery'], this));
+
+        for (let tileIndex in this.emojiTiles) {
+            this.emojiTiles[tileIndex].gameObject.setScale(window.devicePixelRatio, window.devicePixelRatio);
+            this.emojiTiles[tileIndex].gameObject.alpha = 0;
         }
         
-        guessedEmojiTile = emojiTiles[emojiTiles.length - 1];
+        guessedEmojiTile = this.emojiTiles[this.emojiTiles.length - 1];
         guessedEmojiTile.gameObject.node.style.border = '10px solid #ff70a6';
         guessedEmojiTile.gameObject.node.style.backgroundColor = '#ffd670'; 
         
@@ -151,21 +170,21 @@ export default class Emoji extends Scene
 
         this.updateTilePositions();
         
-        this.revealTiles([...emojiTiles]);
+        this.revealTiles([...this.emojiTiles]);
     }
 
 
     updateTilePositions () 
     {
         let y = window.innerHeight * window.devicePixelRatio / 3;
-        if(emojiTiles) {
-            let count = emojiTiles.length;
+        if(this.emojiTiles) {
+            let count = this.emojiTiles.length;
             let xOffset = window.innerWidth * window.devicePixelRatio / (count + 1);
             let x = 0;
             for(let i = 0; i < count; ++i) {
                 x += xOffset;
-                emojiTiles[i].gameObject.x = x;
-                emojiTiles[i].gameObject.y = y;
+                this.emojiTiles[i].gameObject.x = x;
+                this.emojiTiles[i].gameObject.y = y;
             }
         }
         if(webcamGameObject) {
@@ -186,7 +205,7 @@ export default class Emoji extends Scene
         });
         
         // Play the appropriate sound.
-        let sound = codePointToSound[tile.codePoint];
+        let sound = tile.emoji.sound;
         if(sound) {
             sound.play();
         }
@@ -210,7 +229,7 @@ export default class Emoji extends Scene
         if(!isUpdating) {
             isUpdating = true;
             
-            //console.log('update');
+            // console.log('update');
             if(webcam && guessedEmojiTile.gameObject.alpha > 0.9) { //check alpha of final domslot
                 await webcam.update();  
                 
@@ -219,26 +238,26 @@ export default class Emoji extends Scene
                 // the prediction can handle.
                 if(!isPredicting && model && guessedEmojiTile) {
                     isPredicting = true;
-                    //console.log('predict');
+                    // console.log('predict');
 
                     // Turns out this doesn't work in practice - we only get
                     // the same number of update calls as predict calls.
                     // I think this is because the predict call, while async,
                     // actually ends up tying up the runloop anyway :-(
                     model.predict(webcam.canvas).then((prediction) => {
-                        //console.log(prediction);
+                        // console.log(prediction);
 
-                        let codePoint = 0x2753;
+                        let emoji_key = 'mystery';
                         if (prediction[0].probability > 0.7){
-                            codePoint = 0x1F600;
+                            emoji_key = 'happy';
                         } else if (prediction[1].probability > 0.7){
-                            codePoint = 0x1F62E;
+                            emoji_key = 'surprised';
                         } 
                         
-                        //console.log(String.fromCodePoint(codePoint));
-                        guessedEmojiTile.codePoint = codePoint;
+                        console.log(emoji_key);
+                        guessedEmojiTile.emoji = this.emoji[emoji_key];
                         
-                        //console.log('endPredict');
+                        // console.log('endPredict');
                         isPredicting = false;
                     });
                 }
