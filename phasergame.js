@@ -64,7 +64,7 @@ async function create ()
     
     async function createWebcam()
     {
-        let buildWebcam = new tmImage.Webcam(400, 400, true); // width, height, flip
+        let buildWebcam = new tmImage.Webcam(600, 600, true); // width, height, flip
         
         await buildWebcam.setup();
         await buildWebcam.play();    
