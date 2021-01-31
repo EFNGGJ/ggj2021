@@ -257,25 +257,41 @@ export default class Emoji_Pattern extends Scene
                     // the same number of update calls as predict calls.
                     // I think this is because the predict call, while async,
                     // actually ends up tying up the runloop anyway :-(
-                    this.model.predict(this.webcam.canvas).then((prediction) => {
+                    this.model.predict(this.webcam.canvas).then((predictions) => {
                         // console.log(prediction);
 
-                        let emoji_name = 'mystery';
-			let threshold = 0.5;
-                        if (prediction[0].probability > threshold){
-                            emoji_name = 'happy';
-                        } else if (prediction[1].probability > threshold){
-                            emoji_name = 'surprised';
-                        
-                        } else if (prediction[2].probability > threshold){
-                            emoji_name = 'angry';
-                         
-                        } else if (prediction[3].probability > threshold){
-                            emoji_name = 'sleepy';
-                        
-			}
-                        
+                        const threshold = 0.4;
+                        const emoji_names = [
+                            'happy', 
+                            'surprised', 
+                            'angry', 
+                            'sleepy',
+                            //'silly',
+                        ];
+                                                
+                        var bestPredictionProbability = 0;
+                        var bestPredictionIndex;
+                        predictions.forEach((prediction, index, array) => {
+                            if(index < emoji_names.length) {
+                                if(bestPredictionProbability < prediction.probability) {
+                                    bestPredictionIndex = index;
+                                    bestPredictionProbability = prediction.probability;
+                                }
+                            }
+                        });
+
+                        //console.log(`Prediction index: ${bestPredictionIndex}, Prediction probability: ${Math.round(bestPredictionProbability * 100)}%`);
+
+                        const emoji_name = (() => {
+                            if(bestPredictionProbability >= threshold) {
+                                return emoji_names[bestPredictionIndex];
+                            } else {
+                                return 'mystery';
+                            }
+                        })();
+
                         // console.log(emoji_name);
+                        
                         // Check if the emoji is completely new
                         if(emoji_name != this.previousEmojiGuess.name) {
                             
