@@ -4,28 +4,47 @@ import * as tf from '@tensorflow/tfjs';
 import * as tmImage from '@teachablemachine/image';
 
 const teachableMachineURL = "https://teachablemachine.withgoogle.com/models/GFwPntcSE/";
+ 
+var webcam, model, maxPredictions, webcamGameObject, guessedEmojiTile, isPredicting, isUpdating;
 
-var webcam, model, maxPredictions, webcamGameObject, emojiGameObject, isPredicting, isUpdating;
+var emojiTiles;
 
-var slotDomObjects;
-var happy, surprised, sleepy, angry;
+var codePointToSound;
+
+class EmojiTile {
+    constructor (codePoint, scene)
+    {
+        this.codePoint = codePoint;   
+        this.scene = scene;     
+    }  
+    
+    set codePoint (codePoint) {
+        if(this._codePoint != codePoint) {
+            this._codePoint = codePoint;
+            if(this._gameObject) {
+                this._gameObject.node.innerHTML = String.fromCodePoint(codePoint)
+            }
+        }
+    }
+    
+    get codePoint () {
+        return this._codePoint;
+    }
+    
+    get gameObject () 
+    {
+        if(!this._gameObject) {
+            this._gameObject = this.scene.add.dom(0, 0, 'div', {'font-size': '200px'}, String.fromCodePoint(this.codePoint));
+        }
+        return this._gameObject;
+    }
+}
 
 class MainScene extends Phaser.Scene
 {
     preload ()
     {   
         window.addEventListener('resize', resize.bind(this));
-        let happyUrl = require('./audio/happy.m4a');
-        let sleepyUrl = require('./audio/sleepy.m4a');
-        let angryUrl = require('./audio/angry.m4a');
-        let surprisedUrl = require('./audio/surprised.m4a');
-
-
-        this.load.audio('happy', happyUrl);
-        this.load.audio('surprised', surprisedUrl);
-        this.load.audio('sleepy', sleepyUrl);
-        this.load.audio('angry', angryUrl);
-        
         function resize ()
         {
             let pixelRatio = window.devicePixelRatio;
@@ -33,32 +52,48 @@ class MainScene extends Phaser.Scene
             let h = window.innerHeight * window.devicePixelRatio;
             
             this.scale.resize(w , h);
-            this.updateSlotPositionsAndDimensions();
-        }
+            this.updateTilePositions();
+        }  
+        
+        let happyUrl = require('./audio/happy.m4a');
+        let sleepyUrl = require('./audio/sleepy.m4a');
+        let angryUrl = require('./audio/angry.m4a');
+        let surprisedUrl = require('./audio/surprised.m4a');
+
+        this.load.audio('happy', happyUrl);
+        this.load.audio('surprised', surprisedUrl);
+        this.load.audio('sleepy', sleepyUrl);
+        this.load.audio('angry', angryUrl);
     }
 
     async create ()
     {
+        console.log('Creating');
 
-        happy = this.sound.add('happy');
-        surprised = this.sound.add('surprised');
-        sleepy = this.sound.add('sleepy');
-        angry = this.sound.add('angry');
-	
+        codePointToSound = {
+            0x1F600: this.sound.add('happy'),
+            0x1F62E: this.sound.add('surprised'),
+        //sleepy = this.sound.add('sleepy');
+        //angry = this.sound.add('angry');
+        }
 
-        slotDomObjects = [
-            this.add.dom(0, 0, 'div', {'font-size': '200px'}, String.fromCodePoint(0x1F600)),
-            this.add.dom(300, 0, 'div', {'font-size': '200px'}, String.fromCodePoint(0x1F62E)),
-            this.add.dom(600, 0, 'div', {'font-size': '200px'}, String.fromCodePoint(0x1F600)),
-            this.add.dom(300, 0, 'div', {'font-size': '200px', 'border': '10px solid #ff70a6', 'background-color': '#ffd670'}, String.fromCodePoint(0x2753)),
+        emojiTiles = [
+            new EmojiTile(0x1F600, this),
+            new EmojiTile(0x1F62E, this),
+            new EmojiTile(0x1F600, this),
+            new EmojiTile(0x2753, this),
         ];
 
-        for (let slotIndex in slotDomObjects) {
-            slotDomObjects[slotIndex].setScale(window.devicePixelRatio, window.devicePixelRatio);
-            slotDomObjects[slotIndex].alpha = 0;
+        for (let slotIndex in emojiTiles) {
+            emojiTiles[slotIndex].gameObject.setScale(window.devicePixelRatio, window.devicePixelRatio);
+            emojiTiles[slotIndex].gameObject.alpha = 0;
         }
-        emojiGameObject = slotDomObjects[slotDomObjects.length - 1]
-        this.updateSlotPositionsAndDimensions();
+        
+        guessedEmojiTile = emojiTiles[emojiTiles.length - 1];
+        guessedEmojiTile.gameObject.node.style.border = '10px solid #ff70a6';
+        guessedEmojiTile.gameObject.node.style.backgroundColor = '#ffd670'; 
+        
+        this.updateTilePositions();
         
         async function createWebcam()
         {
@@ -96,22 +131,23 @@ class MainScene extends Phaser.Scene
         webcamGameObject = this.add.dom(0, 0, webcamCanvas, null, null),
         webcamGameObject.alpha = 1;
 
-        this.updateSlotPositionsAndDimensions();
+        this.updateTilePositions();
         
-        this.revealGameObjects(slotDomObjects);
+        this.revealTiles([...emojiTiles]);
     }
 
-    updateSlotPositionsAndDimensions () 
+
+    updateTilePositions () 
     {
         let y = window.innerHeight * window.devicePixelRatio / 3;
-        if(slotDomObjects) {
-            let count = slotDomObjects.length;
+        if(emojiTiles) {
+            let count = emojiTiles.length;
             let xOffset = window.innerWidth * window.devicePixelRatio / (count + 1);
             let x = 0;
             for(let i = 0; i < count; ++i) {
                 x += xOffset;
-                slotDomObjects[i].x = x;
-                slotDomObjects[i].y = y;
+                emojiTiles[i].gameObject.x = x;
+                emojiTiles[i].gameObject.y = y;
             }
         }
         if(webcamGameObject) {
@@ -120,18 +156,22 @@ class MainScene extends Phaser.Scene
         }     
     }
 
-    revealGameObjects (gameObjects)
+    revealTiles (tiles)
     {
-	happy.play();
+        let sound = codePointToSound[tiles[0].codePoint];
+        if(sound) {
+            sound.play();
+        }
+
         var tween = this.tweens.add({
-            targets: gameObjects.shift(),
+            targets: tiles.shift().gameObject,
             alpha: { value: 1.0, duration: 2000 },        
         });
         
-        if(gameObjects.length > 0) {
+        if(tiles.length > 0) {
             tween.addListener(
                 'complete',
-                () => { this.revealGameObjects(gameObjects) }
+                () => { this.revealTiles(tiles) }
             );
         }
     }
@@ -142,22 +182,25 @@ class MainScene extends Phaser.Scene
             //console.log('update');
             isUpdating = true;
             
-            if(webcam && emojiGameObject.alpha > 0.9) { //check alpha of final domslot
+            if(webcam && guessedEmojiTile.gameObject.alpha > 0.9) { //check alpha of final domslot
                 await webcam.update();  
                 
-                if(!isPredicting && model && emojiGameObject) {
+                if(!isPredicting && model && guessedEmojiTile) {
                     isPredicting = true;
                     const prediction = await model.predict(webcam.canvas);
 
                     //console.log(prediction);
 
+                    let codePoint = 0x2753;
                     if (prediction[0].probability > 0.7){
-                        emojiGameObject.node.innerHTML = "&#x1F600";
+                        codePoint = 0x1F600;
                     } else if (prediction[1].probability > 0.7){
-                        emojiGameObject.node.innerHTML = "&#x1F62E";
-                    } else {
-                        emojiGameObject.node.innerHTML = "&#x2753";
-                    }   
+                        codePoint = 0x1F62E;
+                    } 
+                    
+                    //console.log(String.fromCodePoint(codePoint));
+                    guessedEmojiTile.codePoint = codePoint;
+                     
                     isPredicting = false;
                 }
             }
