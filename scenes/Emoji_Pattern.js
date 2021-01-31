@@ -261,11 +261,19 @@ export default class Emoji_Pattern extends Scene
                         // console.log(prediction);
 
                         let emoji_name = 'mystery';
-                        if (prediction[0].probability > 0.7){
+			let threshold = 0.5;
+                        if (prediction[0].probability > threshold){
                             emoji_name = 'happy';
-                        } else if (prediction[1].probability > 0.7){
+                        } else if (prediction[1].probability > threshold){
                             emoji_name = 'surprised';
-                        } 
+                        
+                        } else if (prediction[2].probability > threshold){
+                            emoji_name = 'angry';
+                         
+                        } else if (prediction[3].probability > threshold){
+                            emoji_name = 'sleepy';
+                        
+			}
                         
                         // console.log(emoji_name);
                         // Check if the emoji is completely new
