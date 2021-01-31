@@ -8,7 +8,7 @@ import * as tf from '@tensorflow/tfjs';
 import * as tmImage from '@teachablemachine/image';
 import { get, sample, sampleSize } from 'lodash-es';
 
-const teachableMachineURL = "https://teachablemachine.withgoogle.com/models/GFwPntcSE/";
+const teachableMachineURL = "https://teachablemachine.withgoogle.com/models/orHEjDtES/";
 const goFaster = false;
  
 var webcam, model, maxPredictions, webcamGameObject, guessedEmojiTile, isPredicting, isUpdating;
