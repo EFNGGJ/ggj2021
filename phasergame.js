@@ -3,6 +3,8 @@ import Phaser from 'phaser';
 import * as tf from '@tensorflow/tfjs';
 import * as tmImage from '@teachablemachine/image';
 
+import audio from './audio/*.m4a';
+
 const teachableMachineURL = "https://teachablemachine.withgoogle.com/models/GFwPntcSE/";
  
 var webcam, model, maxPredictions, webcamGameObject, guessedEmojiTile, isPredicting, isUpdating;
@@ -63,20 +65,11 @@ class MainScene extends Phaser.Scene
             this.scale.resize(w , h);
             this.updateTilePositions();
         }  
-        
-        // You have to require them like this so that parcel will 
-        // pick up that it has to package the files. If you just hard-code
-        // a URL, parcel will not package it and it will not make it to the
-        // web server.
-        let happyUrl = require('./audio/happy.m4a');
-        let sleepyUrl = require('./audio/sleepy.m4a');
-        let angryUrl = require('./audio/angry.m4a');
-        let surprisedUrl = require('./audio/surprised.m4a');
 
-        this.load.audio('happy', happyUrl);
-        this.load.audio('surprised', surprisedUrl);
-        this.load.audio('sleepy', sleepyUrl);
-        this.load.audio('angry', angryUrl);
+        this.load.audio('happy', audio.happy);
+        this.load.audio('surprised', audio.surprised);
+        this.load.audio('sleepy', audio.sleepy);
+        this.load.audio('angry', audio.angry);
     }
 
     async create ()
