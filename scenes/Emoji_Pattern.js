@@ -140,8 +140,8 @@ export default class Emoji_Pattern extends Scene
         }
         
         this.guessedEmojiTile = this.emojiTiles[this.emojiTiles.length - 1];
-        this.guessedEmojiTile.gameObject.node.style.border = '10px solid #ff70a6';
-        this.guessedEmojiTile.gameObject.node.style.backgroundColor = '#ffd670'; 
+        this.guessedEmojiTile.gameObject.node.style.border = '10px solid var(--color-pink)';
+        this.guessedEmojiTile.gameObject.node.style.backgroundColor = 'var(--color-yellow)'; 
         
         this.updateTilePositions();
         
