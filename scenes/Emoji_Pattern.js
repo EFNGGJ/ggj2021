@@ -57,8 +57,7 @@ class Emoji {
 }
 
 /*
-    To do: read in the pattern dynamically.
-           Time how long the viewer makes the correct face.
+    To do: Time how long the viewer makes the correct face.
            Show the progress in the background of the guessed tile.
            Go to the next pattern at the right time.
            Play the correct sound when you make the right face.
