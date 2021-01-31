@@ -72,6 +72,7 @@ export default class Emoji_Pattern extends Scene
         this.isUpdating = false;
         this.timer;
         this.holdLength = goFaster ? 750 : 2000; // Hold emoji for 2s to win
+        this.debouncedGuesses = []
     }
     
     constructor ()
@@ -234,6 +235,45 @@ export default class Emoji_Pattern extends Scene
         }
     }
 
+    switchGuess (emoji_name)
+    {
+       /* this.debouncedGuesses.add([_.now(), emojiName]);
+
+        let timeNow = _.now()
+        let halfASecondAgo = timeNow - 500;
+        
+        while(_(debouncedGuesses).first().first() < halfASecondAgo) {
+            debouncedGuesses.shift();
+        }
+        
+        var result = _.head(_(debouncedGuesses)
+        .countBy()
+        .entries()
+        .maxBy(_.last));*/
+        
+        if(emoji_name != this.previousEmojiGuess.name) {
+            console.log(`new guess: ${emoji_name}`);
+            if (emoji_name == this.targetEmoji.name) {    
+                // Start the timer!
+                this.timer = this.time.addEvent({
+                    delay: this.holdLength,
+                    repeat: 0,
+                    callback: this.success,
+                    callbackScope: this
+                })
+            } else {
+                // This guess is wrong! 
+                // Stop the timer.
+                if (this.timer) {
+                    this.timer.remove();
+                    this.timer = null;                             
+                }
+            }
+            
+            this.guessedEmojiTile.emoji = this.emoji[emoji_name];
+            this.previousEmojiGuess = this.guessedEmojiTile.emoji;
+        }
+    }
 
     async update ()
     {
@@ -298,30 +338,8 @@ export default class Emoji_Pattern extends Scene
     
                             // console.log(emoji_name);
                             
-                            // Check if the emoji is completely new
-                            if(emoji_name != this.previousEmojiGuess.name) {
-                                
-                                console.log(`new guess: ${emoji_name}`);
-                                if (emoji_name == this.targetEmoji.name) {    
-                                    // Start the timer!
-                                    this.timer = this.time.addEvent({
-                                        delay: this.holdLength,
-                                        repeat: 0,
-                                        callback: this.success,
-                                        callbackScope: this
-                                    })
-                                } else {
-                                    // This guess is wrong! 
-                                    // Stop the timer.
-                                    if (this.timer) {
-                                        this.timer.remove();
-                                        this.timer = null;                             
-                                    }
-                                }
-    
-                                this.guessedEmojiTile.emoji = this.emoji[emoji_name];
-                                this.previousEmojiGuess = this.guessedEmojiTile.emoji;
-                            }
+                            this.switchGuess(emoji_name);
+
                             
                             // console.log('endPredict');
                             this.isPredicting = false;
