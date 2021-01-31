@@ -9,7 +9,7 @@ import * as tmImage from '@teachablemachine/image';
 import { get, sample, sampleSize } from 'lodash-es';
 
 const teachableMachineURL = "https://teachablemachine.withgoogle.com/models/orHEjDtES/";
-const goFaster = true;
+const goFaster = false;
 
 var codePointToSound;
 
