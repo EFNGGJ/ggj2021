@@ -6,7 +6,7 @@ import emojiSounds from '../assets/Emoji/*.m4a';
 
 import * as tf from '@tensorflow/tfjs';
 import * as tmImage from '@teachablemachine/image';
-import { get, sample, sampleSize } from 'lodash-es';
+import { get, sample, sampleSize, last } from 'lodash-es';
 
 const teachableMachineURL = "https://teachablemachine.withgoogle.com/models/orHEjDtES/";
 const goFaster = false;
@@ -67,6 +67,7 @@ export default class Emoji_Pattern extends Scene
 {
     init ()
     {
+        this.state = 'loading';
         this.isPredicting = false;
         this.isUpdating = false;
         this.timer;
@@ -183,6 +184,7 @@ export default class Emoji_Pattern extends Scene
 
         this.updateTilePositions();
         
+        this.state = 'revealing'
         this.revealTiles([...this.emojiTiles]);
     }
 
@@ -214,7 +216,15 @@ export default class Emoji_Pattern extends Scene
         // Animate it in.
         var tween = this.tweens.add({
             targets: tile.gameObject,
-            alpha: { value: 1.0, duration: goFaster ? 200 : 2000 },        
+            alpha: { value: 1.0, duration: goFaster ? 200 : 2000 },  
+            
+            // If there are any tiles left, add a completion handler to this 
+            // animation that will call this function again to animate the next one.
+            // If there are no tiles left, switch our state to 'playing' after the
+            // animation completes.
+            onComplete:  tiles.length > 0 ? 
+                () => { this.revealTiles(tiles); } : 
+                () => { this.state = 'playing'; console.log("playing") }
         });
         
         // Play the appropriate sound.
@@ -222,16 +232,8 @@ export default class Emoji_Pattern extends Scene
         if(sound) {
             sound.play();
         }
-        
-        // If there are any tiles left, add a completion handler to this 
-        // animation that will call this function again to animate the next one.
-        if(tiles.length > 0) {
-            tween.addListener(
-                'complete',
-                () => { this.revealTiles(tiles) }
-            );
-        }
     }
+
 
     async update ()
     {
@@ -241,94 +243,100 @@ export default class Emoji_Pattern extends Scene
         // point).
         if(!this.isUpdating) {
             this.isUpdating = true;
-            
             // console.log('update');
-            if(this.webcam && this.guessedEmojiTile.gameObject.alpha > 0.9) { //check alpha of final domslot
-                await this.webcam.update();  
-                
-                // If we're not already predicting, start a prediction.
-                // Again, we guard in case we're getting called faster than
-                // the prediction can handle.
-                if(!this.isPredicting && this.model && this.guessedEmojiTile) {
-                    this.isPredicting = true;
-                    // console.log('predict');
 
-                    // Turns out this doesn't work in practice - we only get
-                    // the same number of update calls as predict calls.
-                    // I think this is because the predict call, while async,
-                    // actually ends up tying up the runloop anyway :-(
-                    this.model.predict(this.webcam.canvas).then((predictions) => {
-                        // console.log(prediction);
-
-                        const threshold = 0.4;
-                        const emoji_names = [
-                            'happy', 
-                            'surprised', 
-                            'angry', 
-                            'sleepy',
-                            'silly',
-                        ];
-                                                
-                        var bestPredictionProbability = 0;
-                        var bestPredictionIndex;
-                        predictions.forEach((prediction, index, array) => {
-                            if(index < emoji_names.length) {
-                                if(bestPredictionProbability < prediction.probability) {
-                                    bestPredictionIndex = index;
-                                    bestPredictionProbability = prediction.probability;
-                                }
-                            }
-                        });
-
-                        //console.log(`Prediction index: ${bestPredictionIndex}, Prediction probability: ${Math.round(bestPredictionProbability * 100)}%`);
-
-                        const emoji_name = (() => {
-                            if(bestPredictionProbability >= threshold) {
-                                return emoji_names[bestPredictionIndex];
-                            } else {
-                                return 'mystery';
-                            }
-                        })();
-
-                        // console.log(emoji_name);
-                        
-                        // Check if the emoji is completely new
-                        if(emoji_name != this.previousEmojiGuess.name) {
-                            
-                            console.log(`new guess: ${emoji_name}`);
-                            if (emoji_name == this.targetEmoji.name) {    
-                                // Start the timer!
-                                this.timer = this.time.addEvent({
-                                    delay: this.holdLength,
-                                    repeat: 0,
-                                    callback: this.success,
-                                    callbackScope: this
-                                })
-                            } else {
-                                // This guess is wrong! 
-                                // Stop the timer.
-                                if (this.timer) {
-                                    this.timer.remove();
-                                    this.timer = null;                             
-                                }
-                            }
-
-                            this.guessedEmojiTile.emoji = this.emoji[emoji_name];
-                            this.previousEmojiGuess = this.guessedEmojiTile.emoji;
-                        }
-                        
-                        // console.log('endPredict');
-                        this.isPredicting = false;
-                    });
+            switch(this.state) {
+                default: {
+                    break;
                 }
-                
-                // Update the progress towards the win.
-                let percent = this.timer ? (this.timer.getProgress() * 100) : 0;
-                let newBackground = `linear-gradient(0, var(--color-orange) ${percent}%, var(--color-yellow) ${percent}%)`;
-                this.guessedEmojiTile.gameObject.node.style.background = newBackground
+                case 'playing': { 
+                    await this.webcam.update();  
+                        
+                    // If we're not already predicting, start a prediction.
+                    // Again, we guard in case we're getting called faster than
+                    // the prediction can handle.
+                    if(!this.isPredicting) {
+                        this.isPredicting = true;
+                        // console.log('predict');
+    
+                        // Turns out this doesn't work in practice - we only get
+                        // the same number of update calls as predict calls.
+                        // I think this is because the predict call, while async,
+                        // actually ends up tying up the runloop anyway :-(
+                        this.model.predict(this.webcam.canvas).then((predictions) => {
+                            // console.log(prediction);
+    
+                            const threshold = 0.4;
+                            const emoji_names = [
+                                'happy', 
+                                'surprised', 
+                                'angry', 
+                                'sleepy',
+                                'silly',
+                            ];
+                                                    
+                            var bestPredictionProbability = 0;
+                            var bestPredictionIndex;
+                            predictions.forEach((prediction, index, array) => {
+                                if(index < emoji_names.length) {
+                                    if(bestPredictionProbability < prediction.probability) {
+                                        bestPredictionIndex = index;
+                                        bestPredictionProbability = prediction.probability;
+                                    }
+                                }
+                            });
+    
+                            //console.log(`Prediction index: ${bestPredictionIndex}, Prediction probability: ${Math.round(bestPredictionProbability * 100)}%`);
+    
+                            const emoji_name = (() => {
+                                if(bestPredictionProbability >= threshold) {
+                                    return emoji_names[bestPredictionIndex];
+                                } else {
+                                    return 'mystery';
+                                }
+                            })();
+    
+                            // console.log(emoji_name);
+                            
+                            // Check if the emoji is completely new
+                            if(emoji_name != this.previousEmojiGuess.name) {
+                                
+                                console.log(`new guess: ${emoji_name}`);
+                                if (emoji_name == this.targetEmoji.name) {    
+                                    // Start the timer!
+                                    this.timer = this.time.addEvent({
+                                        delay: this.holdLength,
+                                        repeat: 0,
+                                        callback: this.success,
+                                        callbackScope: this
+                                    })
+                                } else {
+                                    // This guess is wrong! 
+                                    // Stop the timer.
+                                    if (this.timer) {
+                                        this.timer.remove();
+                                        this.timer = null;                             
+                                    }
+                                }
+    
+                                this.guessedEmojiTile.emoji = this.emoji[emoji_name];
+                                this.previousEmojiGuess = this.guessedEmojiTile.emoji;
+                            }
+                            
+                            // console.log('endPredict');
+                            this.isPredicting = false;
+                        });
+                    }
+                    
+                    // Update the progress towards the win.
+                    let percent = this.timer ? (this.timer.getProgress() * 100) : 0;
+                    let newBackground = `linear-gradient(0, var(--color-orange) ${percent}%, var(--color-yellow) ${percent}%)`;
+                    this.guessedEmojiTile.gameObject.node.style.background = newBackground
+                }
+                break;
             }
+            
             //console.log('endUpdate');
-
             this.isUpdating = false; 
         }
     }
@@ -336,6 +344,28 @@ export default class Emoji_Pattern extends Scene
     success ()
     {
         console.log("Success!");
-        this.scene.restart();
+        this.state = 'success';
+        
+        let sound = last(this.emojiTiles).emoji.sound
+        if(sound) {
+            sound.play();
+        }
+
+        var tween = this.tweens.add({
+            targets: this.emojiTiles.map(tile => { return tile.gameObject }).concat([this.webcamGameObject]),
+            
+            delay: 200,
+            duration: goFaster ? 250 : 500,
+            
+            alpha: { value: 0.0 },        
+            scale: '*=1.5',  
+            angle: { value: 359 },
+            
+            onComplete: () => { 
+                this.state = 'restarting';
+                console.log('restarting!');
+                this.scene.restart();
+            }    
+        });
     }
 }
