@@ -4,9 +4,9 @@
   "description": "Global Game Jam 2021",
   "main": "game.js",
   "scripts": {
-    "build": "parcel build phaser.html --public-url ./",
+    "build": "parcel build index.html --public-url ./",
     "clean": "rm -rfv dist/",
-    "start": "parcel phaser.html"
+    "start": "parcel index.html"
   },
   "repository": {
     "type": "git",
