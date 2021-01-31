@@ -21,7 +21,7 @@ const config = {
 };
 
 const game = new Phaser.Game(config);
-var webcam, model, maxPredictions, webcamGameObject, emojiGameObject, isPredicting;
+var webcam, model, maxPredictions, webcamGameObject, emojiGameObject, isPredicting, isUpdating;
 
 var slotDomObjects;
 
@@ -43,8 +43,6 @@ function preload ()
         this.scale.resize(w , h);
         updateSlotPositionsAndDimensions();
     }
-
-
 }
 
 async function create ()
@@ -58,6 +56,7 @@ async function create ()
 
     for (let slotIndex in slotDomObjects) {
         slotDomObjects[slotIndex].setScale(window.devicePixelRatio, window.devicePixelRatio);
+        slotDomObjects[slotIndex].alpha = 0;
     }
     emojiGameObject = slotDomObjects[slotDomObjects.length - 1]
     updateSlotPositionsAndDimensions();
@@ -72,26 +71,35 @@ async function create ()
         webcam = buildWebcam;
     }
 
+    let buildModel;
     async function createModel()
     {
         const modelURL = teachableMachineURL + "model.json";
         const metadataURL = teachableMachineURL + "metadata.json";
 
-        model = await tmImage.load(modelURL, metadataURL);
-        maxPredictions = model.getTotalClasses();
+        buildModel = await tmImage.load(modelURL, metadataURL);
+        maxPredictions = buildModel.getTotalClasses();
     }
 
     await Promise.all([
         createWebcam.call(this),
         createModel.call(this),
     ]);
-
-
+    
+    // First call to predict is very slow and hangs the main thread,
+    // so do it here before it gets called in update().
+    await buildModel.predict(webcam.canvas);
+    model = buildModel;
+    
     let webcamCanvas = await webcam.canvas;
 
     webcamGameObject = this.add.dom(0, 0, webcamCanvas, null, null),
-    
+    webcamGameObject.alpha = 0;
+
     updateSlotPositionsAndDimensions();
+    
+    revealSlots.call(this);
+    
 }
 
 function updateSlotPositionsAndDimensions() 
@@ -113,27 +121,40 @@ function updateSlotPositionsAndDimensions()
     }     
 }
 
+function revealSlots()
+{
+    console.log(this.tweens.add({
+        targets: slotDomObjects.concat([webcamGameObject]),
+        alpha: { value: 1.5, duration: 100 },        
+    }));
+}
+
 async function update ()
 {
-    if(webcam) {
+    if(!isUpdating) {
+        console.log('update');
+        isUpdating = true;
+        
+        if(webcam) {
+            await webcam.update();  
+            
+            if(!isPredicting && model && emojiGameObject) {
+                isPredicting = true;
+                const prediction = await model.predict(webcam.canvas);
 
-        await webcam.update();
-     
-    
-    if(!isPredicting && model && emojiGameObject) {
-        isPredicting = true;
-        const prediction = await model.predict(webcam.canvas);
+                //console.log(prediction);
 
-        //console.log(prediction);
+                if (prediction[0].probability > 0.7){
+                    emojiGameObject.node.innerHTML = "&#x1F600";
+                } else if (prediction[1].probability > 0.7){
+                    emojiGameObject.node.innerHTML = "&#x1F62E";
+                } else {
+                    emojiGameObject.node.innerHTML = "&#x2753";
+                }   
+                isPredicting = false;
+            }
+        }
 
-        if (prediction[0].probability > 0.7){
-            emojiGameObject.node.innerHTML = "&#x1F600";
-        } else if (prediction[1].probability > 0.7){
-            emojiGameObject.node.innerHTML = "&#x1F62E";
-        } else {
-            emojiGameObject.node.innerHTML = "&#x2753";
-        }   
-        isPredicting = false;
-	}
-    } 
+        isUpdating = false; 
+    }
 }
