@@ -49,7 +49,7 @@ class MainScene extends Phaser.Scene
         
         async function createWebcam()
         {
-            let buildWebcam = new tmImage.Webcam(400, 400, true); // width, height, flip
+            let buildWebcam = new tmImage.Webcam(600, 600, true); // width, height, flip
             
             await buildWebcam.setup();
             await buildWebcam.play();    
@@ -81,11 +81,11 @@ class MainScene extends Phaser.Scene
         let webcamCanvas = await webcam.canvas;
 
         webcamGameObject = this.add.dom(0, 0, webcamCanvas, null, null),
-        webcamGameObject.alpha = 0;
+        webcamGameObject.alpha = 1;
 
         this.updateSlotPositionsAndDimensions();
         
-        this.revealGameObjects(slotDomObjects.concat([webcamGameObject]));
+        this.revealGameObjects(slotDomObjects);
     }
 
     updateSlotPositionsAndDimensions () 
@@ -128,7 +128,7 @@ class MainScene extends Phaser.Scene
             //console.log('update');
             isUpdating = true;
             
-            if(webcam) {
+            if(webcam && emojiGameObject.alpha > 0.9) { //check alpha of final domslot
                 await webcam.update();  
                 
                 if(!isPredicting && model && emojiGameObject) {
