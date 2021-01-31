@@ -2,6 +2,11 @@
 # Created by https://www.toptal.com/developers/gitignore/api/windows,macos,vim,emacs,vscode,xcode
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,macos,vim,emacs,vscode,xcode
 
+.cache
+node_modules
+dist/
+
+
 ### Emacs ###
 # -*- mode: gitignore; -*-
 *~
@@ -36,7 +41,6 @@ ltximg/**
 
 # cask packages
 .cask/
-dist/
 
 # Flycheck
 flycheck_*.el
