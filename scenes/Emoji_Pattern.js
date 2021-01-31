@@ -307,8 +307,9 @@ export default class Emoji_Pattern extends Scene
                             } else {
                                 // This guess is wrong! 
                                 // Stop the timer.
-                                if (this.timer !== undefined) {
-                                    this.timer.remove();                                
+                                if (this.timer) {
+                                    this.timer.remove();
+                                    this.timer = null;                             
                                 }
                             }
 
