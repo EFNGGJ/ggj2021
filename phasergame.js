@@ -34,10 +34,10 @@ class MainScene extends Phaser.Scene
     async create ()
     {
         slotDomObjects = [
-        this.add.dom(0, 0, 'div', {'font-size': '200px'}, String.fromCodePoint(0x1F600)),
-        this.add.dom(300, 0, 'div', {'font-size': '200px'}, String.fromCodePoint(0x1F62E)),
-        this.add.dom(600, 0, 'div', {'font-size': '200px'}, String.fromCodePoint(0x1F600)),
-        this.add.dom(300, 0, 'div', {'font-size': '200px', 'border': '10px solid #ff70a6', 'background-color': '#ffd670'}, String.fromCodePoint(0x2753)),
+            this.add.dom(0, 0, 'div', {'font-size': '200px'}, String.fromCodePoint(0x1F600)),
+            this.add.dom(300, 0, 'div', {'font-size': '200px'}, String.fromCodePoint(0x1F62E)),
+            this.add.dom(600, 0, 'div', {'font-size': '200px'}, String.fromCodePoint(0x1F600)),
+            this.add.dom(300, 0, 'div', {'font-size': '200px', 'border': '10px solid #ff70a6', 'background-color': '#ffd670'}, String.fromCodePoint(0x2753)),
         ];
 
         for (let slotIndex in slotDomObjects) {
@@ -68,8 +68,8 @@ class MainScene extends Phaser.Scene
         }
 
         await Promise.all([
-        createWebcam.call(this),
-        createModel.call(this),
+            createWebcam.call(this),
+            createModel.call(this),
         ]);
         
         // First call to predict is very slow and hangs the main thread,
