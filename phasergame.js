@@ -116,8 +116,8 @@ class MainScene extends Phaser.Scene
         
         if(gameObjects.length > 0) {
             tween.addListener(
-            'complete',
-            () => { this.revealGameObjects(gameObjects) }
+                'complete',
+                () => { this.revealGameObjects(gameObjects) }
             );
         }
     }
@@ -125,7 +125,7 @@ class MainScene extends Phaser.Scene
     async update ()
     {
         if(!isUpdating) {
-            console.log('update');
+            //console.log('update');
             isUpdating = true;
             
             if(webcam) {
