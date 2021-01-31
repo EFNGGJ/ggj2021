@@ -29,13 +29,100 @@
     ],
     "patterns": [
       {
-        "key": "default",
-        "emoji": [
-          "happy",
-          "surprised",
-          "happy"
+        "key": "same_same",
+        "elementCount": 2,
+        "sequence": [
+          0,
+          0
         ],
-        "target_emoji": "surprised"
+        "target": 0
+      },
+      {
+        "key": "alternate",
+        "elementCount": 2,
+        "sequence": [
+          0,
+          1,
+          0,
+          1,
+          0
+        ],
+        "target": 1
+      },
+      {
+        "key": "step_2",
+        "elementCount": 2,
+        "sequence": [
+          0,
+          0,
+          1,
+          0,
+          0
+        ],
+        "target": 1
+      },
+      {
+        "key": "0_1_1",
+        "elementCount": 2,
+        "sequence": [
+          0,
+          1,
+          1,
+          0,
+          1
+        ],
+        "target": 1
+      },
+      {
+        "key": "1_0_1",
+        "elementCount": 2,
+        "sequence": [
+          1,
+          0,
+          1,
+          1,
+          0
+        ],
+        "target": 1
+      },
+      {
+        "key": "0_1_2",
+        "elementCount": 3,
+        "sequence": [
+          0,
+          1,
+          2,
+          0,
+          1
+        ],
+        "target": 2
+      },
+      {
+        "key": "0_1_0",
+        "elementCount": 2,
+        "sequence": [
+          0,
+          1,
+          0,
+          0,
+          1,
+          0
+        ],
+        "target": 1
+      },
+      {
+        "key": "0_1_2",
+        "elementCount": 3,
+        "sequence": [
+          0,
+          1,
+          0,
+          2,
+          0,
+          1,
+          0
+        ],
+        "target": 2
       }
     ]
   }

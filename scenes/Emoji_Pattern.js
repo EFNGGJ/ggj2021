@@ -6,7 +6,7 @@ import emojiSounds from '../assets/Emoji/*.m4a';
 
 import * as tf from '@tensorflow/tfjs';
 import * as tmImage from '@teachablemachine/image';
-import { get } from 'lodash-es';
+import { get, sample, sampleSize } from 'lodash-es';
 
 const teachableMachineURL = "https://teachablemachine.withgoogle.com/models/GFwPntcSE/";
  
@@ -21,8 +21,8 @@ class EmojiTile {
         this.scene = scene;
     }
 
-    set emoji (emoji) {
-        console.log("set emoji: ", emoji);
+    set emoji (emoji)
+    {
         if (this._emoji.name != emoji.name) {
             this._emoji = emoji;
 
@@ -40,7 +40,6 @@ class EmojiTile {
     get gameObject () 
     {
         if(!this._gameObject) {
-            console.log("gameObject: ", this._emoji);
             this._gameObject = this.scene.add.dom(0, 0, 'div', {'font-size': '200px'}, this._emoji.string);
         }
         return this._gameObject;
@@ -102,20 +101,25 @@ export default class Emoji_Pattern extends Scene
         console.log('Creating');
 
         this.emoji = {}
+        var available_emoji_names = []
 
         for (let e of this.stored_data.emoji) {
             var sound = null;
 
             if (e.hasSound) {
                 sound = this.sound.add(e.name);
+                available_emoji_names.push(e.name);
             }
             this.emoji[e.name] = new Emoji(e.name, e.codePoint, sound);
         }
 
         this.emojiTiles = [];
-        let pattern = this.patterns[0];
-        for (let ename of pattern.emoji) {
-            this.emojiTiles.push(new EmojiTile(this.emoji[ename], this));
+        let pattern = sample(this.patterns);
+        let pattern_emoji = sampleSize(available_emoji_names, pattern.elementCount)
+
+        for (let index of pattern.sequence) {
+            let tile_emoji = this.emoji[pattern_emoji[index]]
+            this.emojiTiles.push(new EmojiTile(tile_emoji, this));
         }
 
         // Last tile is the question mark
@@ -254,7 +258,7 @@ export default class Emoji_Pattern extends Scene
                             emoji_key = 'surprised';
                         } 
                         
-                        console.log(emoji_key);
+                        // console.log(emoji_key);
                         guessedEmojiTile.emoji = this.emoji[emoji_key];
                         
                         // console.log('endPredict');
