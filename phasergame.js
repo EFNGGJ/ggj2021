@@ -171,14 +171,17 @@ class MainScene extends Phaser.Scene
 
     revealTiles (tiles)
     {
-        // Animate the first tile in the array, and remove it from the array.
+        // Get the first tile in the array, and remove it from the array.
+        let tile = tiles.shift()
+        
+        // Animate it in.
         var tween = this.tweens.add({
-            targets: tiles.shift().gameObject,
+            targets: tile.gameObject,
             alpha: { value: 1.0, duration: 2000 },        
         });
         
         // Play the appropriate sound.
-        let sound = codePointToSound[tiles[0].codePoint];
+        let sound = codePointToSound[tile.codePoint];
         if(sound) {
             sound.play();
         }
