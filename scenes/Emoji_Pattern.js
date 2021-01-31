@@ -10,8 +10,6 @@ import { get, sample, sampleSize } from 'lodash-es';
 
 const teachableMachineURL = "https://teachablemachine.withgoogle.com/models/orHEjDtES/";
 const goFaster = false;
- 
-var webcam, model, maxPredictions, webcamGameObject, guessedEmojiTile, isPredicting, isUpdating;
 
 var codePointToSound;
 
@@ -69,6 +67,8 @@ export default class Emoji_Pattern extends Scene
 {
     init ()
     {
+        this.isPredicting = false;
+        this.isUpdating = false;
         this.timer;
         this.holdLength = goFaster ? 750 : 2000; // Hold emoji for 2s to win
     }
@@ -139,9 +139,9 @@ export default class Emoji_Pattern extends Scene
             this.emojiTiles[tileIndex].gameObject.alpha = 0;
         }
         
-        guessedEmojiTile = this.emojiTiles[this.emojiTiles.length - 1];
-        guessedEmojiTile.gameObject.node.style.border = '10px solid #ff70a6';
-        guessedEmojiTile.gameObject.node.style.backgroundColor = '#ffd670'; 
+        this.guessedEmojiTile = this.emojiTiles[this.emojiTiles.length - 1];
+        this.guessedEmojiTile.gameObject.node.style.border = '10px solid #ff70a6';
+        this.guessedEmojiTile.gameObject.node.style.backgroundColor = '#ffd670'; 
         
         this.updateTilePositions();
         
@@ -152,7 +152,7 @@ export default class Emoji_Pattern extends Scene
             await buildWebcam.setup();
             await buildWebcam.play();    
             
-            webcam = buildWebcam;
+            this.webcam = buildWebcam;
         }
 
         let buildModel;
@@ -162,7 +162,7 @@ export default class Emoji_Pattern extends Scene
             const metadataURL = teachableMachineURL + "metadata.json";
 
             buildModel = await tmImage.load(modelURL, metadataURL);
-            maxPredictions = buildModel.getTotalClasses();
+            this.maxPredictions = buildModel.getTotalClasses();
         }
 
         await Promise.all([
@@ -172,14 +172,14 @@ export default class Emoji_Pattern extends Scene
         
         // First call to predict is very slow and hangs the main thread,
         // so do it here before it gets called in update().
-        await buildModel.predict(webcam.canvas);
+        await buildModel.predict(this.webcam.canvas);
         
-        model = buildModel;
+        this.model = buildModel;
 
-        let webcamCanvas = await webcam.canvas;
+        let webcamCanvas = await this.webcam.canvas;
 
-        webcamGameObject = this.add.dom(0, 0, webcamCanvas, null, null),
-        webcamGameObject.alpha = 1;
+        this.webcamGameObject = this.add.dom(0, 0, webcamCanvas, null, null),
+        this.webcamGameObject.alpha = 1;
 
         this.updateTilePositions();
         
@@ -200,9 +200,9 @@ export default class Emoji_Pattern extends Scene
                 this.emojiTiles[i].gameObject.y = y;
             }
         }
-        if(webcamGameObject) {
-            webcamGameObject.x = window.innerWidth * window.devicePixelRatio / 2;
-            webcamGameObject.y = y * 2;
+        if(this.webcamGameObject) {
+            this.webcamGameObject.x = window.innerWidth * window.devicePixelRatio / 2;
+            this.webcamGameObject.y = y * 2;
         }     
     }
 
@@ -239,25 +239,25 @@ export default class Emoji_Pattern extends Scene
         // can actually do all the things (this function is async, so it
         // will potentially return control to the main loop at any await
         // point).
-        if(!isUpdating) {
-            isUpdating = true;
+        if(!this.isUpdating) {
+            this.isUpdating = true;
             
             // console.log('update');
-            if(webcam && guessedEmojiTile.gameObject.alpha > 0.9) { //check alpha of final domslot
-                await webcam.update();  
+            if(this.webcam && this.guessedEmojiTile.gameObject.alpha > 0.9) { //check alpha of final domslot
+                await this.webcam.update();  
                 
                 // If we're not already predicting, start a prediction.
                 // Again, we guard in case we're getting called faster than
                 // the prediction can handle.
-                if(!isPredicting && model && guessedEmojiTile) {
-                    isPredicting = true;
+                if(!this.isPredicting && this.model && this.guessedEmojiTile) {
+                    this.isPredicting = true;
                     // console.log('predict');
 
                     // Turns out this doesn't work in practice - we only get
                     // the same number of update calls as predict calls.
                     // I think this is because the predict call, while async,
                     // actually ends up tying up the runloop anyway :-(
-                    model.predict(webcam.canvas).then((prediction) => {
+                    this.model.predict(this.webcam.canvas).then((prediction) => {
                         // console.log(prediction);
 
                         let emoji_name = 'mystery';
@@ -269,44 +269,48 @@ export default class Emoji_Pattern extends Scene
                         
                         // console.log(emoji_name);
                         // Check if the emoji is completely new
-                        if (emoji_name == this.targetEmoji.name &&
-                            emoji_name != this.previousEmojiGuess.name) {
+                        if(emoji_name != this.previousEmojiGuess.name) {
+                            
                             console.log(`new guess: ${emoji_name}`);
-                        
-                            // reset timer
-                            this.timer = this.time.addEvent({
-                                delay: this.holdLength,
-                                repeat: 0,
-                                callback: this.success,
-                                callbackScope: this
-                            })
-                        } else if (emoji_name != this.targetEmoji.name) {
-                            if (this.timer !== undefined) {
-                                this.timer.remove();                                
+                            if (emoji_name == this.targetEmoji.name) {    
+                                // Start the timer!
+                                this.timer = this.time.addEvent({
+                                    delay: this.holdLength,
+                                    repeat: 0,
+                                    callback: this.success,
+                                    callbackScope: this
+                                })
+                            } else {
+                                // This guess is wrong! 
+                                // Stop the timer.
+                                if (this.timer !== undefined) {
+                                    this.timer.remove();                                
+                                }
                             }
-                        }
 
-                        guessedEmojiTile.emoji = this.emoji[emoji_name];
-                        this.previousEmojiGuess = guessedEmojiTile.emoji;
+                            this.guessedEmojiTile.emoji = this.emoji[emoji_name];
+                            this.previousEmojiGuess = this.guessedEmojiTile.emoji;
+                        }
                         
                         // console.log('endPredict');
-                        isPredicting = false;
+                        this.isPredicting = false;
                     });
                 }
                 
                 // Update the progress towards the win.
                 let percent = this.timer ? (this.timer.getProgress() * 100) : 0;
                 let newBackground = `linear-gradient(0, var(--color-orange) ${percent}%, var(--color-yellow) ${percent}%)`;
-                guessedEmojiTile.gameObject.node.style.background = newBackground
+                this.guessedEmojiTile.gameObject.node.style.background = newBackground
             }
             //console.log('endUpdate');
 
-            isUpdating = false; 
+            this.isUpdating = false; 
         }
     }
 
     success ()
     {
         console.log("Success!");
+        this.scene.restart();
     }
 }
