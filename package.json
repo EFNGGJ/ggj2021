@@ -1,0 +1,35 @@
+{
+  "name": "ggj2021",
+  "version": "1.0.0",
+  "description": "Global Game Jam 2021",
+  "main": "game.js",
+  "scripts": {
+    "build": "parcel build src/index.html --public-url ./",
+    "clean": "rm -rfv dist/",
+    "start": "parcel phaser.html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thegrene/ggj2021.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/thegrene/ggj2021/issues"
+  },
+  "homepage": "https://github.com/thegrene/ggj2021#readme",
+  "devDependencies": {
+    "cssnano": "^4.1.10",
+    "parcel-bundler": "^1.12.4"
+  },
+  "dependencies": {
+    "@teachablemachine/image": "^0.8.4",
+    "@tensorflow/tfjs": "^1.3.1",
+    "phaser": "^3.52.0",
+    "webpack": "^5.19.0"
+  },
+  "browserslist": [
+    "since 2017-06"
+  ]
+}
