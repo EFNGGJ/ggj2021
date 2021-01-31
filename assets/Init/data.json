@@ -22,6 +22,11 @@
         "hasSound": true
       },
       {
+        "name": "silly",
+        "codePoint": "0x1F92A",
+        "hasSound": true
+      },
+      {
         "name": "mystery",
         "codePoint": "0x2753",
         "hasSound": false
@@ -48,6 +53,17 @@
           0
         ],
         "target": 1
+      },
+      {
+        "key": "alternate_short",
+        "elementCount": 2,
+        "sequence": [
+          0,
+          1,
+          0,
+          1
+        ],
+        "target": 0
       },
       {
         "key": "step_2",
@@ -108,10 +124,10 @@
           1,
           0
         ],
-        "target": 1
+        "target": 0
       },
       {
-	"key": "0_1_0p",
+	"key": "0_1_0_short",
 	"elementCount": 2,
 	"sequence": [
 	  0,
@@ -123,7 +139,19 @@
 	"target": 0
       },
       {
-        "key": "0_1_2",
+	"key": "doubles",
+	"elementCount": 3,
+	"sequence": [
+	  0,
+	  0,
+	  1,
+	  1,
+	  2
+	],
+	"target": 2
+      },
+      {
+        "key": "0_1_0_2",
         "elementCount": 3,
         "sequence": [
           0,
@@ -135,6 +163,19 @@
           0
         ],
         "target": 2
+      },
+      {
+        "key": "0_1_0_2_short",
+        "elementCount": 3,
+        "sequence": [
+          0,
+          1,
+          0,
+          2,
+          0,
+          1
+        ],
+        "target": 0
       }
     ]
   }
