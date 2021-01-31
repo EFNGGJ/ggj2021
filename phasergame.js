@@ -16,7 +16,7 @@ const config = {
         createContainer: true,
     },
     parent: 'game',
-    backgroundColor: '#0072bc',
+    backgroundColor: '#70d6ff',
     scale: {
         mode: Phaser.Scale.NONE,
         width: window.innerWidth * window.devicePixelRatio,
@@ -61,7 +61,7 @@ async function create ()
 {
     async function createWebcam()
     {
-        let buildWebcam = new tmImage.Webcam(400, 400, false); // width, height, flip
+        let buildWebcam = new tmImage.Webcam(400, 400, true); // width, height, flip
         
         await buildWebcam.setup();
         await buildWebcam.play();    
@@ -91,7 +91,7 @@ async function create ()
         this.add.dom(0, 0, 'div', {'font-size': '200px'}, String.fromCodePoint(0x1F600)),
         this.add.dom(300, 0, 'div', {'font-size': '200px'}, String.fromCodePoint(0x1F62E)),
         this.add.dom(600, 0, 'div', {'font-size': '200px'}, String.fromCodePoint(0x1F600)),
-        this.add.dom(300, 0, 'div', {'font-size': '200px'}, String.fromCodePoint(0x1F62E)),
+        this.add.dom(300, 0, 'div', {'font-size': '200px', 'border':'10px solid #ff70a6','background-color': '#ffd770'}, String.fromCodePoint(0x2753)),
     ];
 
     for (let slotIndex in slotDomObjects) {
@@ -142,7 +142,7 @@ async function update ()
         } else if (prediction[1].probability > 0.7){
             emojiGameObject.node.innerHTML = "&#x1F62E";
         } else {
-            emojiGameObject.node.innerHTML = "?";
+            emojiGameObject.node.innerHTML = "&#x2753";
         }   
         isPredicting = false;
     } 
