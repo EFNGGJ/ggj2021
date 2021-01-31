@@ -138,7 +138,7 @@ class MainScene extends Phaser.Scene
         await buildModel.predict(webcam.canvas);
         
         model = buildModel;
-        
+
         let webcamCanvas = await webcam.canvas;
 
         webcamGameObject = this.add.dom(0, 0, webcamCanvas, null, null),
@@ -212,34 +212,33 @@ class MainScene extends Phaser.Scene
                 // If we're not already predicting, start a prediction.
                 // Again, we guard in case we're getting called faster than
                 // the prediction can handle.
-                
-                // TODO: This guard scheme doesn't actually work.
-                // I want to _start_ a prediction if there's not one aready
-                // running, but fall through if there is one, setting
-                // isUpdating to false, so that on the next call to 
-                // update(), we can potentially update the webcam image even
-                // if the prediction isn't finished yet.
-                // But the way this works, it's not going to set isUpdating 
-                // to false until the prediction is done.
                 if(!isPredicting && model && guessedEmojiTile) {
                     isPredicting = true;
-                    const prediction = await model.predict(webcam.canvas);
+                    //console.log('predict');
 
-                    //console.log(prediction);
+                    // Turns out this doesn't work in practice - we only get
+                    // the same number of update calls as predict calls.
+                    // I think this is because the predict call, while async,
+                    // actually ends up tying up the runloop anyway :-(
+                    model.predict(webcam.canvas).then((prediction) => {
+                        //console.log(prediction);
 
-                    let codePoint = 0x2753;
-                    if (prediction[0].probability > 0.7){
-                        codePoint = 0x1F600;
-                    } else if (prediction[1].probability > 0.7){
-                        codePoint = 0x1F62E;
-                    } 
-                    
-                    //console.log(String.fromCodePoint(codePoint));
-                    guessedEmojiTile.codePoint = codePoint;
-                     
-                    isPredicting = false;
+                        let codePoint = 0x2753;
+                        if (prediction[0].probability > 0.7){
+                            codePoint = 0x1F600;
+                        } else if (prediction[1].probability > 0.7){
+                            codePoint = 0x1F62E;
+                        } 
+                        
+                        //console.log(String.fromCodePoint(codePoint));
+                        guessedEmojiTile.codePoint = codePoint;
+                        
+                        //console.log('endPredict');
+                        isPredicting = false;
+                    });
                 }
             }
+            //console.log('endUpdate');
 
             isUpdating = false; 
         }
