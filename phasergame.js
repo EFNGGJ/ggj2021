@@ -111,7 +111,7 @@ class MainScene extends Phaser.Scene
     {
         var tween = this.tweens.add({
             targets: gameObjects.shift(),
-            alpha: { value: 1.5, duration: 100 },        
+            alpha: { value: 1.0, duration: 2000 },        
         });
         
         if(gameObjects.length > 0) {
