@@ -212,6 +212,15 @@ class MainScene extends Phaser.Scene
                 // If we're not already predicting, start a prediction.
                 // Again, we guard in case we're getting called faster than
                 // the prediction can handle.
+                
+                // TODO: This guard scheme doesn't actually work.
+                // I want to _start_ a prediction if there's not one aready
+                // running, but fall through if there is one, setting
+                // isUpdating to false, so that on the next call to 
+                // update(), we can potentially update the webcam image even
+                // if the prediction isn't finished yet.
+                // But the way this works, it's not going to set isUpdating 
+                // to false until the prediction is done.
                 if(!isPredicting && model && guessedEmojiTile) {
                     isPredicting = true;
                     const prediction = await model.predict(webcam.canvas);
