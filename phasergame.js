@@ -89,6 +89,7 @@ async function create ()
     // First call to predict is very slow and hangs the main thread,
     // so do it here before it gets called in update().
     await buildModel.predict(webcam.canvas);
+    
     model = buildModel;
     
     let webcamCanvas = await webcam.canvas;
@@ -98,8 +99,7 @@ async function create ()
 
     updateSlotPositionsAndDimensions();
     
-    revealSlots.call(this);
-    
+    revealGameObjects.call(this, slotDomObjects.concat([webcamGameObject]));
 }
 
 function updateSlotPositionsAndDimensions() 
@@ -121,12 +121,20 @@ function updateSlotPositionsAndDimensions()
     }     
 }
 
-function revealSlots()
+function revealGameObjects(array, index = 0)
 {
-    console.log(this.tweens.add({
-        targets: slotDomObjects.concat([webcamGameObject]),
+    var tween = this.tweens.add({
+        targets: [array[index]],
         alpha: { value: 1.5, duration: 100 },        
-    }));
+    });
+    
+    ++index;
+    if(index < array.length) {
+        tween.addListener(
+            'complete',
+            () => { revealGameObjects.call(this, array, index) }
+        );
+    }
 }
 
 async function update ()
