@@ -9,6 +9,7 @@ import * as tmImage from '@teachablemachine/image';
 import { get, sample, sampleSize } from 'lodash-es';
 
 const teachableMachineURL = "https://teachablemachine.withgoogle.com/models/GFwPntcSE/";
+const goFaster = false;
  
 var webcam, model, maxPredictions, webcamGameObject, guessedEmojiTile, isPredicting, isUpdating;
 
@@ -69,7 +70,7 @@ export default class Emoji_Pattern extends Scene
     init ()
     {
         this.timer;
-        this.holdLength = 1000; // Hold emoji for 1s to win
+        this.holdLength = goFaster ? 1000 : 3000; // Hold emoji for 3s to win
     }
 
     constructor ()
@@ -213,7 +214,7 @@ export default class Emoji_Pattern extends Scene
         // Animate it in.
         var tween = this.tweens.add({
             targets: tile.gameObject,
-            alpha: { value: 1.0, duration: 2000 },        
+            alpha: { value: 1.0, duration: goFaster ? 200 : 2000 },        
         });
         
         // Play the appropriate sound.
@@ -292,6 +293,11 @@ export default class Emoji_Pattern extends Scene
                         isPredicting = false;
                     });
                 }
+                
+                // Update the progress towards the win.
+                let percent = this.timer ? (this.timer.getProgress() * 100) : 0;
+                let newBackground = `linear-gradient(0, var(--color-orange) ${percent}%, var(--color-yellow) ${percent}%)`;
+                guessedEmojiTile.gameObject.node.style.background = newBackground
             }
             //console.log('endUpdate');
 
