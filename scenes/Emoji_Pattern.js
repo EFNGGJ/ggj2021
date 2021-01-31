@@ -66,6 +66,12 @@ class Emoji {
 
 export default class Emoji_Pattern extends Scene
 {
+    init ()
+    {
+        this.timer;
+        this.holdLength = 1000; // Hold emoji for 1s to win
+    }
+
     constructor ()
     {
         super(EMOJI_PATTERN);
@@ -120,6 +126,9 @@ export default class Emoji_Pattern extends Scene
             let tile_emoji = this.emoji[pattern_emoji[index]]
             this.emojiTiles.push(new EmojiTile(tile_emoji, this));
         }
+
+        this.targetEmoji = this.emoji[pattern_emoji[pattern.target]];
+        this.previousEmojiGuess = this.emoji['mystery'];
 
         // Last tile is the question mark
         this.emojiTiles.push(new EmojiTile(this.emoji['mystery'], this));
@@ -250,15 +259,34 @@ export default class Emoji_Pattern extends Scene
                     model.predict(webcam.canvas).then((prediction) => {
                         // console.log(prediction);
 
-                        let emoji_key = 'mystery';
+                        let emoji_name = 'mystery';
                         if (prediction[0].probability > 0.7){
-                            emoji_key = 'happy';
+                            emoji_name = 'happy';
                         } else if (prediction[1].probability > 0.7){
-                            emoji_key = 'surprised';
+                            emoji_name = 'surprised';
                         } 
                         
-                        // console.log(emoji_key);
-                        guessedEmojiTile.emoji = this.emoji[emoji_key];
+                        // console.log(emoji_name);
+                        // Check if the emoji is completely new
+                        if (emoji_name == this.targetEmoji.name &&
+                            emoji_name != this.previousEmojiGuess.name) {
+                            console.log(`new guess: ${emoji_name}`);
+                        
+                            // reset timer
+                            this.timer = this.time.addEvent({
+                                delay: this.holdLength,
+                                repeat: 0,
+                                callback: this.success,
+                                callbackScope: this
+                            })
+                        } else if (emoji_name != this.targetEmoji.name) {
+                            if (this.timer !== undefined) {
+                                this.timer.remove();                                
+                            }
+                        }
+
+                        guessedEmojiTile.emoji = this.emoji[emoji_name];
+                        this.previousEmojiGuess = guessedEmojiTile.emoji;
                         
                         // console.log('endPredict');
                         isPredicting = false;
@@ -269,5 +297,10 @@ export default class Emoji_Pattern extends Scene
 
             isUpdating = false; 
         }
+    }
+
+    success ()
+    {
+        console.log("Success!");
     }
 }
