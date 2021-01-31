@@ -1,13 +1,3 @@
-function include(file) { 
-  var script  = document.createElement('script'); 
-  script.src  = file; 
-  script.type = 'text/javascript';   
-  document.getElementsByTagName('head').item(0).appendChild(script); 
-} 
-include('https://cdn.jsdelivr.net/npm/phaser@3.19.0/dist/phaser-arcade-physics.js')
-include('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js')
-include('https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js')
-
 const teachableMachineURL = "https://teachablemachine.withgoogle.com/models/GFwPntcSE/";
 
 const config = {
@@ -59,6 +49,19 @@ function preload ()
 
 async function create ()
 {
+    slotDomObjects = [
+        this.add.dom(0, 0, 'div', {'font-size': '200px'}, String.fromCodePoint(0x1F600)),
+        this.add.dom(300, 0, 'div', {'font-size': '200px'}, String.fromCodePoint(0x1F62E)),
+        this.add.dom(600, 0, 'div', {'font-size': '200px'}, String.fromCodePoint(0x1F600)),
+        this.add.dom(300, 0, 'div', {'font-size': '200px', 'border': '10px solid #ff70a6', 'background-color': '#ffd670'}, String.fromCodePoint(0x2753)),
+    ];
+
+    for (let slotIndex in slotDomObjects) {
+        slotDomObjects[slotIndex].setScale(window.devicePixelRatio, window.devicePixelRatio);
+    }
+    emojiGameObject = slotDomObjects[slotDomObjects.length - 1]
+    updateSlotPositionsAndDimensions();
+    
     async function createWebcam()
     {
         let buildWebcam = new tmImage.Webcam(400, 400, true); // width, height, flip
@@ -82,28 +85,13 @@ async function create ()
         createWebcam.call(this),
         createModel.call(this),
     ]);
-    await model.predict(webcam.canvas);
 
 
     let webcamCanvas = await webcam.canvas;
-    
-    slotDomObjects = [
-        this.add.dom(0, 0, 'div', {'font-size': '200px'}, String.fromCodePoint(0x1F600)),
-        this.add.dom(300, 0, 'div', {'font-size': '200px'}, String.fromCodePoint(0x1F62E)),
-        this.add.dom(600, 0, 'div', {'font-size': '200px'}, String.fromCodePoint(0x1F600)),
-        this.add.dom(300, 0, 'div', {'font-size': '200px', 'border':'10px solid #ff70a6','background-color': '#ffd770'}, String.fromCodePoint(0x2753)),
-    ];
-
-    for (let slotIndex in slotDomObjects) {
-        slotDomObjects[slotIndex].setScale(window.devicePixelRatio, window.devicePixelRatio);
-    }
-    emojiGameObject = slotDomObjects[slotDomObjects.length - 1]
 
     webcamGameObject = this.add.dom(0, 0, webcamCanvas, null, null),
     
     updateSlotPositionsAndDimensions();
-    
-    console.log('created')
 }
 
 function updateSlotPositionsAndDimensions() 
@@ -128,8 +116,9 @@ function updateSlotPositionsAndDimensions()
 async function update ()
 {
     if(webcam) {
-        webcam.update();
-    } 
+
+        await webcam.update();
+     
     
     if(!isPredicting && model && emojiGameObject) {
         isPredicting = true;
@@ -145,5 +134,6 @@ async function update ()
             emojiGameObject.node.innerHTML = "&#x2753";
         }   
         isPredicting = false;
+	}
     } 
 }
