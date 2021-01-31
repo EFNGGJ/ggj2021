@@ -121,18 +121,17 @@ function updateSlotPositionsAndDimensions()
     }     
 }
 
-function revealGameObjects(array, index = 0)
+function revealGameObjects(gameObjects)
 {
     var tween = this.tweens.add({
-        targets: [array[index]],
+        targets: gameObjects.shift(),
         alpha: { value: 1.5, duration: 100 },        
     });
     
-    ++index;
-    if(index < array.length) {
+    if(gameObjects.length > 0) {
         tween.addListener(
             'complete',
-            () => { revealGameObjects.call(this, array, index) }
+            () => { revealGameObjects.call(this, gameObjects) }
         );
     }
 }
