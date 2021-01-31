@@ -8,17 +8,23 @@ const teachableMachineURL = "https://teachablemachine.withgoogle.com/models/GFwP
 var webcam, model, maxPredictions, webcamGameObject, emojiGameObject, isPredicting, isUpdating;
 
 var slotDomObjects;
+var happy, surprised, sleepy, angry;
 
 class MainScene extends Phaser.Scene
 {
     preload ()
     {   
         window.addEventListener('resize', resize.bind(this));
+        let happyUrl = require('./audio/happy.m4a');
+        let sleepyUrl = require('./audio/sleepy.m4a');
+        let angryUrl = require('./audio/angry.m4a');
+        let surprisedUrl = require('./audio/surprised.m4a');
 
-        this.load.audio('happy', 'audio/happy.mp4');
-        this.load.audio('surprised', 'audio/surprised.mp4');
-        this.load.audio('sleepy', 'audio/sleepy.mp4');
-        this.load.audio('angry', 'audio/angry.mp4');
+
+        this.load.audio('happy', happyUrl);
+        this.load.audio('surprised', surprisedUrl);
+        this.load.audio('sleepy', sleepyUrl);
+        this.load.audio('angry', angryUrl);
         
         function resize ()
         {
@@ -33,6 +39,13 @@ class MainScene extends Phaser.Scene
 
     async create ()
     {
+
+        happy = this.sound.add('happy');
+        surprised = this.sound.add('surprised');
+        sleepy = this.sound.add('sleepy');
+        angry = this.sound.add('angry');
+	
+
         slotDomObjects = [
             this.add.dom(0, 0, 'div', {'font-size': '200px'}, String.fromCodePoint(0x1F600)),
             this.add.dom(300, 0, 'div', {'font-size': '200px'}, String.fromCodePoint(0x1F62E)),
@@ -109,6 +122,7 @@ class MainScene extends Phaser.Scene
 
     revealGameObjects (gameObjects)
     {
+	happy.play();
         var tween = this.tweens.add({
             targets: gameObjects.shift(),
             alpha: { value: 1.0, duration: 2000 },        
