@@ -40,6 +40,15 @@ class EmojiTile {
     }
 }
 
+/*
+    To do: read in the pattern dynamically.
+           Time how long the viewer makes the correct face.
+           Show the progress in the background of the guessed tile.
+           Go to the next pattern at the right time.
+           Play the correct sound when you make the right face.
+           Put in real music.
+*/
+
 class MainScene extends Phaser.Scene
 {
     preload ()
@@ -55,6 +64,10 @@ class MainScene extends Phaser.Scene
             this.updateTilePositions();
         }  
         
+        // You have to require them like this so that parcel will 
+        // pick up that it has to package the files. If you just hard-code
+        // a URL, parcel will not package it and it will not make it to the
+        // web server.
         let happyUrl = require('./audio/happy.m4a');
         let sleepyUrl = require('./audio/sleepy.m4a');
         let angryUrl = require('./audio/angry.m4a');
@@ -84,9 +97,9 @@ class MainScene extends Phaser.Scene
             new EmojiTile(0x2753, this),
         ];
 
-        for (let slotIndex in emojiTiles) {
-            emojiTiles[slotIndex].gameObject.setScale(window.devicePixelRatio, window.devicePixelRatio);
-            emojiTiles[slotIndex].gameObject.alpha = 0;
+        for (let tileIndex in emojiTiles) {
+            emojiTiles[tileIndex].gameObject.setScale(window.devicePixelRatio, window.devicePixelRatio);
+            emojiTiles[tileIndex].gameObject.alpha = 0;
         }
         
         guessedEmojiTile = emojiTiles[emojiTiles.length - 1];
@@ -158,16 +171,20 @@ class MainScene extends Phaser.Scene
 
     revealTiles (tiles)
     {
-        let sound = codePointToSound[tiles[0].codePoint];
-        if(sound) {
-            sound.play();
-        }
-
+        // Animate the first tile in the array, and remove it from the array.
         var tween = this.tweens.add({
             targets: tiles.shift().gameObject,
             alpha: { value: 1.0, duration: 2000 },        
         });
         
+        // Play the appropriate sound.
+        let sound = codePointToSound[tiles[0].codePoint];
+        if(sound) {
+            sound.play();
+        }
+        
+        // If there are any tiles left, add a completion handler to this 
+        // animation that will call this function again to animate the next one.
         if(tiles.length > 0) {
             tween.addListener(
                 'complete',
@@ -178,13 +195,20 @@ class MainScene extends Phaser.Scene
 
     async update ()
     {
+        // Guard here in case update() is getting called faster than we
+        // can actually do all the things (this function is async, so it
+        // will potentially return control to the main loop at any await
+        // point).
         if(!isUpdating) {
-            //console.log('update');
             isUpdating = true;
             
+            //console.log('update');
             if(webcam && guessedEmojiTile.gameObject.alpha > 0.9) { //check alpha of final domslot
                 await webcam.update();  
                 
+                // If we're not already predicting, start a prediction.
+                // Again, we guard in case we're getting called faster than
+                // the prediction can handle.
                 if(!isPredicting && model && guessedEmojiTile) {
                     isPredicting = true;
                     const prediction = await model.predict(webcam.canvas);
