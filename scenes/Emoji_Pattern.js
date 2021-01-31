@@ -70,9 +70,9 @@ export default class Emoji_Pattern extends Scene
     init ()
     {
         this.timer;
-        this.holdLength = goFaster ? 1000 : 3000; // Hold emoji for 3s to win
+        this.holdLength = goFaster ? 750 : 2000; // Hold emoji for 2s to win
     }
-
+    
     constructor ()
     {
         super(EMOJI_PATTERN);
