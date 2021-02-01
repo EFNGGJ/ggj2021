@@ -7,6 +7,7 @@ import emojiSounds from '../assets/Emoji/*.m4a';
 import * as tf from '@tensorflow/tfjs';
 import * as tmImage from '@teachablemachine/image';
 import { get, sample, sampleSize, last } from 'lodash-es';
+import * as _ from 'lodash-es';
 
 const teachableMachineURL = "https://teachablemachine.withgoogle.com/models/orHEjDtES/";
 const goFaster = false;
@@ -67,6 +68,7 @@ export default class Emoji_Pattern extends Scene
 {
     init ()
     {
+        this.levelStartTime = _.now()
         this.state = 'loading';
         this.isPredicting = false;
         this.isUpdating = false;
@@ -250,20 +252,30 @@ export default class Emoji_Pattern extends Scene
 
     switchGuess (emoji_name)
     {
-       /* this.debouncedGuesses.add([_.now(), emojiName]);
 
-        let timeNow = _.now()
-        let halfASecondAgo = timeNow - 500;
+        let timeNow = _.now() - this.levelStartTime;
         
-        while(_(debouncedGuesses).first().first() < halfASecondAgo) {
-            debouncedGuesses.shift();
-        }
+        // We'll maintain a list of the most recent guesses. Add this guess to 
+        // the end.
+        this.debouncedGuesses.push([timeNow, emoji_name]);
+
+        // Remove old guesses
+        let oldestTime = timeNow - 250;
+        this.debouncedGuesses = this.debouncedGuesses.filter(timeAndGuess => _.first(timeAndGuess) >= oldestTime );
         
-        var result = _.head(_(debouncedGuesses)
-        .countBy()
-        .entries()
-        .maxBy(_.last));*/
+        // Now, find the most common recent guess
+        let names = _.chain(this.debouncedGuesses).map(_.last).value()
+        var mostCommon = _.head(
+            _.chain(names)
+             .countBy()
+             .entries()
+             .maxBy(_.last)
+             .value()
+        );
         
+        //console.log(`${this.debouncedGuesses} --> ${names} --> ${mostCommon}`);
+        
+        emoji_name = mostCommon;
         if(emoji_name != this.previousEmojiGuess.name) {
             console.log(`new guess: ${emoji_name}`);
             if (emoji_name == this.targetEmoji.name) {    
