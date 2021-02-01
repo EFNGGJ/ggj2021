@@ -108,6 +108,8 @@ export default class Emoji_Pattern extends Scene
     {
         console.log('Creating');
 
+        this.scene_data = this.scene.settings.data;
+
         this.emoji = {}
         var available_emoji_names = []
 
@@ -122,7 +124,18 @@ export default class Emoji_Pattern extends Scene
         }
 
         this.emojiTiles = [];
-        let pattern = sample(this.patterns);
+        var pattern;
+
+        // Grab the next pattern index, if it exists. Otherwise, start at index 0.
+        this.next_pattern_index = get(this.scene_data, 'next_pattern_index', 0);
+        console.log(`Next pattern index: ${this.next_pattern_index}`);
+
+        if (this.next_pattern_index >= this.patterns.length) {
+            pattern = sample(this.patterns);
+        } else {
+            pattern = this.patterns[this.next_pattern_index];
+        }
+
         let pattern_emoji = sampleSize(available_emoji_names, pattern.elementCount)
 
         for (let index of pattern.sequence) {
@@ -382,7 +395,9 @@ export default class Emoji_Pattern extends Scene
             onComplete: () => { 
                 this.state = 'restarting';
                 console.log('restarting!');
-                this.scene.restart();
+                this.scene.restart({
+                    next_pattern_index: this.next_pattern_index + 1
+                });
             }    
         });
     }
