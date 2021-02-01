@@ -264,16 +264,15 @@ export default class Emoji_Pattern extends Scene
         this.debouncedGuesses = this.debouncedGuesses.filter(timeAndGuess => _.first(timeAndGuess) >= oldestTime );
         
         // Now, find the most common recent guess
-        let names = _.chain(this.debouncedGuesses).map(_.last).value()
-        var mostCommon = _.head(
-            _.chain(names)
+        var mostCommon = _.chain(this.debouncedGuesses)
+             .map(_.last)
              .countBy()
-             .entries()
+             .toPairs()
              .maxBy(_.last)
-             .value()
-        );
-        
-        //console.log(`${this.debouncedGuesses} --> ${names} --> ${mostCommon}`);
+             .first()
+             .value();
+                     
+        console.log(`${this.debouncedGuesses} --> ${mostCommon}`);
         
         emoji_name = mostCommon;
         if(emoji_name != this.previousEmojiGuess.name) {
