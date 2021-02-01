@@ -56,14 +56,6 @@ class Emoji {
     }
 }
 
-/*
-    To do: Time how long the viewer makes the correct face.
-           Show the progress in the background of the guessed tile.
-           Go to the next pattern at the right time.
-           Play the correct sound when you make the right face.
-           Put in real music.
-*/
-
 export default class Emoji_Pattern extends Scene
 {
     init ()
