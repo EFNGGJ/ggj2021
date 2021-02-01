@@ -264,11 +264,11 @@ export default class Emoji_Pattern extends Scene
              .first()
              .value();
                      
-        console.log(`${this.debouncedGuesses} --> ${mostCommon}`);
+        //console.log(`${this.debouncedGuesses} --> ${mostCommon}`);
         
         emoji_name = mostCommon;
         if(emoji_name != this.previousEmojiGuess.name) {
-            console.log(`new guess: ${emoji_name}`);
+            //console.log(`new guess: ${emoji_name}`);
             if (emoji_name == this.targetEmoji.name) {    
                 // Start the timer!
                 this.timer = this.time.addEvent({
